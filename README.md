@@ -2,33 +2,47 @@
 # Deep Learning
 ## Project: Build a Traffic Sign Recognition Program
 
-### Overview
+## Summary:
+This repo contains my submission for the traffic sign recognition project for Udacity's Self-Driving Car Engineer Nanodegree program.
 
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to classify traffic signs. You will train a model so it can decode traffic signs from natural images by using the [German Traffic Sign Dataset](http://benchmark.ini.rub.de/?section=gtsrb&subsection=dataset). After the model is trained, you will then test your model program on new images of traffic signs you find on the web, or, if you're feeling adventurous pictures of traffic signs you find locally!
+- `report.html` contains the executed code from image loading to training and testing the deep neural network
+- `/tranined_weights` contains the saved weights for the final network
+- `/test_images` contains 10 sample 32x32 color images of signs used to challenge the trained network
 
-### Dependencies
+## Network Performance:
+The final network has training and validation accuracies of over 98% and a testing accuracy of over 92%.
 
-This project requires **Python 3.5** and the following Python libraries installed:
+## Network Architecture:
+My final architecture involves a convolutional neural network (CNN) similar to that of AlexNet, but with several important updates/changes. In general, the architecture incorporates two convolution layers followed by two fully connected layers.
 
-- [Jupyter](http://jupyter.org/)
-- [NumPy](http://www.numpy.org/)
-- [SciPy](https://www.scipy.org/)
-- [scikit-learn](http://scikit-learn.org/)
-- [TensorFlow](http://tensorflow.org)
+*General Parameters*:
+- Number of hidden layers = 64
+- Number of patches for the convolutions = 5
+- Depth of hidden layers = 64
 
-Run this command at the terminal prompt to install [OpenCV](http://opencv.org/). Useful for image processing:
+*1st Convolutional Layer*
 
-- `conda install -c https://conda.anaconda.org/menpo opencv3`
+The first layer is fed the 32x32x3 color image. This image is put through a 2-dimensional convolution with a stride of 1. Next, the result of the convolution is added with a bias vector and their sum is processed using the `tf.nn.relu` activation operator. Then, the result of this activation is put through a max pooling operator using kernal of `[1,2,2,1]` and a stride of `[1,2,2,1]`. Finally, the result of this max pooling is put through a local response normalization operation.
 
-### Dataset
+*2nd Convolutional Layer*
 
-1. Download the dataset. You can download the pickled dataset in which we've already resized the images to 32x32 [here](https://d17h27t6h515a5.cloudfront.net/topher/2016/October/580d53ce_traffic-sign-data/traffic-sign-data.zip).
- 
-2. Clone the project and start the notebook.
-```
-git clone https://github.com/udacity/traffic-signs
-cd traffic-signs
-jupyter notebook Traffic_Signs_Recognition.ipynb
-```
-3. Follow the instructions in the `Traffic_Signs_Recognition.ipynb` notebook.
+The second convolutional layer is identical to the first, with two main exceptions. First is that the second layer is fed the output of the first convolutional layer. Second is that following the activation layer, the local responsed normalization occurs prior to the max pooling operator.
 
+*1st Fully Connected Layer*
+
+The output of the second convolutional layer is reshaped and multiplied by a weight matrix. The result of this multiplication is added to a bias vector, and that summation is passed through the `tf.nn.relu` activation function.
+
+*2nd Fully Connected Layer*
+
+The network concludes by multiplying the result of the 1st fully connected layer with a weight matrix, adding a bias, and returning the result for the softmax probability operation to provide the final classification.
+
+## Training Architecture
+Weights used in the convolutional layers were initialized using a truncated normal distribution with a standard deviation of 0.1. Bias weights were either initialized to zeros or ones. Weights for the fully connected layers were initialized also using a truncated normal distribution with a standard deviation of 0.1.
+
+Image classes were transformed into one-hot encodings.
+
+The model was trained using batch sets of 64 with 4501 training steps.
+
+A reduced mean, cross entropy loss function was fed the logits from the last fully connected layer. This loss was then minimized using a momentum optimizer with a decaying learning rate. The initial learning rate was set to 0.01 and exponentially decayed per each training step.
+
+Regularization techniques such as imposing an L2 norm to the weights or using dropout regularization had no significant impact in improving the model's performance, so they were ultimately excluded from the final model.
